@@ -13,9 +13,8 @@ return new class extends Migration
     {
         Schema::create('nilai', function (Blueprint $table) {
             $table->id();
-            $table->integer('nilai_p');
-            $table->integer('nilai_K');
             $table->integer('nilai_r');
+            $table->text('keterangan');
             $table->unsignedBigInteger('mapel_id');
             $table->unsignedBigInteger('semester_id');
             $table->timestamps();
