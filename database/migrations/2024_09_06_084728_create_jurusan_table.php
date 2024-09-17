@@ -14,7 +14,11 @@ return new class extends Migration
         Schema::create('jurusan', function (Blueprint $table) {
             $table->id();
             $table->string('nama_jurusan');
+            $table->unsignedBigInteger('user_id');
             $table->timestamps();
+
+            //foreign key
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
         });
     }
 
