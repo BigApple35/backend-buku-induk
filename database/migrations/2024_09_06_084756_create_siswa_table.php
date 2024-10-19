@@ -16,12 +16,14 @@ return new class extends Migration
             $table->string('nisn');
             $table->unsignedBigInteger('angkatan_id');
             $table->unsignedBigInteger('jurusan_id');
+            $table->unsignedBigInteger('kelas_id');
             $table->unsignedBigInteger('foto_id');
             $table->timestamps();
 
             //foreign key
             $table->foreign('angkatan_id')->references('id')->on('angkatan')->onDelete('cascade');
             $table->foreign('jurusan_id')->references('id')->on('jurusan')->onDelete('cascade');
+            $table->foreign('kelas_id')->references('id')->on('kelas')->onDelete('cascade');
             $table->foreign('foto_id')->references('id')->on('foto')->onDelete('cascade');
         });
     }
