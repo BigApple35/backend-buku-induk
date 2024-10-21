@@ -18,8 +18,8 @@ class JurusanController extends Controller
     {
         $request->validate([
             'nama_jurusan' => 'required|string|max:255',
+            'singkatan' => 'required|string|max:255',
             'user_id' => 'required|exists:users,id',
-            'angkatan_id' => 'required|exists:angkatan,id'
         ]);
 
         $jurusan = Jurusan::create($request->all());

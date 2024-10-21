@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\AngkatanController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\BagianKelasController;
+use App\Http\Controllers\JurusanController;
 use App\Http\Controllers\KelasController;
 use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
@@ -22,6 +24,8 @@ Route::group(["middleware" => ["auth:sanctum", "checkrole:admin"], "prefix" => "
     Route::post("user/deactivate/{id}", [UserController::class, "deactivate"]);
 
     Route::resource("/angkatan", AngkatanController::class);
+    Route::resource("/jurusan", JurusanController::class);
+    Route::apiResource('/bagian-kelas', BagianKelasController::class);
 
     Route::resource('kelas', KelasController::class);
     Route::get('jurusan/{jurusan}/kelas', [KelasController::class, 'getByJurusan']);

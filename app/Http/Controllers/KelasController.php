@@ -8,50 +8,93 @@ use Illuminate\Http\Request;
 
 class KelasController extends Controller
 {
+    /**
+     * Display a listing of the resource.
+     */
     public function index()
     {
-        $kelas = Kelas::with('jurusan')->get();
-        return response()->json(['kelas' => $kelas]);
+        // Eager load related Jurusan, BagianKelas, and Angkatan
+        $kelas = Kelas::with(['jurusan', 'bagianKelas', 'angkatan'])->get();
+
+        // Add the 'judul_kelas' field to each class
+        $kelas->transform(function ($kls) {
+            $kls->judul_kelas = $kls->nama . ' ' . $kls->bagianKelas->nama;
+            return $kls;
+        });
+
+        return response()->json($kelas);
     }
 
+    /**
+     * Store a newly created resource in storage.
+     */
     public function store(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'nama' => 'required|string|max:255',
-            'jurusan_id' => 'required|exists:jurusan,id'
+            'jurusan_id' => 'required|exists:jurusan,id',
+            'angkatan_id' => 'required|exists:angkatan,id',
+            'bagian_kelas_id' => 'required|array',
+            'bagian_kelas_id.*' => 'exists:bagian_kelas,id',
         ]);
 
-        $kelas = Kelas::create($request->all());
-        return response()->json(['message' => 'Kelas created successfully', 'kelas' => $kelas], 201);
+        $classes = [];
+
+        // Loop through each bagian_kelas_id and create a class
+        foreach ($validated['bagian_kelas_id'] as $bagianKelasId) {
+            $kelas = Kelas::create([
+                'nama' => $validated['nama'],
+                'jurusan_id' => $validated['jurusan_id'],
+                'angkatan_id' => $validated['angkatan_id'],
+                'bagian_kelas_id' => $bagianKelasId,
+            ]);
+            $classes[] = $kelas;
+        }
+
+        return response()->json($classes, 201);
     }
 
-    public function show(Kelas $kelas)
+    /**
+     * Display the specified resource.
+     */
+    public function show($id)
     {
-        $kelas->load('jurusan');
-        return response()->json(['kelas' => $kelas]);
+        // Eager load related Jurusan, BagianKelas, and Angkatan for a single class
+        $kelas = Kelas::with(['jurusan', 'bagianKelas', 'angkatan'])->findOrFail($id);
+
+        // Add the 'judul_kelas' field
+        $kelas->judul_kelas = $kelas->nama . ' ' . $kelas->bagianKelas->nama;
+
+        return response()->json($kelas);
     }
 
-    public function update(Request $request, Kelas $kelas)
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, $id)
     {
-        $request->validate([
-            'nama' => 'required|string|max:255',
-            'jurusan_id' => 'required|exists:jurusan,id'
+        $kelas = Kelas::findOrFail($id);
+
+        $validated = $request->validate([
+            'nama' => 'sometimes|string|max:255',
+            'jurusan_id' => 'sometimes|exists:jurusan,id',
+            'angkatan_id' => 'sometimes|exists:angkatan,id',
+            'bagian_kelas_id' => 'sometimes|exists:bagian_kelas,id',
         ]);
 
-        $kelas->update($request->all());
-        return response()->json(['message' => 'Kelas updated successfully', 'kelas' => $kelas]);
+        $kelas->update($validated);
+
+        return response()->json($kelas);
     }
 
-    public function destroy(Kelas $kelas)
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy($id)
     {
+        $kelas = Kelas::findOrFail($id);
         $kelas->delete();
-        return response()->json(['message' => 'Kelas deleted successfully']);
-    }
 
-    public function getByJurusan($jurusanId)
-    {
-        $jurusan = Jurusan::findOrFail($jurusanId);
-        $kelas = $jurusan->kelas;
-        return response()->json(['kelas' => $kelas]);
+        return response()->json(null, 204);
     }
 }

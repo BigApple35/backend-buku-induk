@@ -14,7 +14,8 @@ return new class extends Migration
         Schema::create('jurusan', function (Blueprint $table) {
             $table->id();
             $table->string('nama_jurusan');
-            $table->unsignedBigInteger('user_id');
+            $table->string("singkatan");
+            $table->unsignedBigInteger('user_id')->nullable();
             $table->timestamps();
 
             //foreign key
